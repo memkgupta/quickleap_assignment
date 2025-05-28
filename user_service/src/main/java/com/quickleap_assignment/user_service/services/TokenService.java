@@ -1,0 +1,50 @@
+package com.quickleap_assignment.user_service.services;
+
+
+import com.quickleap_assignment.user_service.entities.Token;
+import com.quickleap_assignment.user_service.entities.User;
+import com.quickleap_assignment.user_service.repositories.TokenRepository;
+import org.springframework.stereotype.Service;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.Instant;
+
+@Service
+public class TokenService {
+    private final TokenRepository tokenRepository;
+    private final JWTService jwtService;
+    public TokenService(TokenRepository tokenRepository, JWTService jwtService) {
+        this.tokenRepository = tokenRepository;
+        this.jwtService = jwtService;
+    }
+
+    public String refreshToken(String token){
+       Token t= tokenRepository.findByToken(token).orElse(null);
+
+       if(t==null){
+           throw new RuntimeException("Token not found");
+       }
+       if(t.getExpires().before(new Date(Instant.now().toEpochMilli()))){
+           throw new RuntimeException("Token is expired");
+       }
+       try {
+           return jwtService.generateToken(t.getUser().getEmail());
+       }
+     catch (Exception e){
+           e.printStackTrace();
+           throw new RuntimeException("Some error occured");
+     }
+    }
+
+    public String generateToken(User user) {
+        String token = jwtService.generateToken(user.getEmail());
+        Token t= new Token();
+        t.setUser(user);
+        t.setToken(token);
+        t.setExpires(new Timestamp(System.currentTimeMillis()+1000*60*60*24));
+        t.setCreated(new Timestamp(System.currentTimeMillis()));
+        t.setUser(user);
+        return tokenRepository.save(t).getToken();
+    }
+}
