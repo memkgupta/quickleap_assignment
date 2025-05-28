@@ -1,6 +1,3 @@
-Got it bro — since it’s an **assignment**, here’s a clean and professional-style README you can submit without looking like you’re just flexing your microservices setup. It’ll still explain everything neatly, keep it formal enough for an assignment, and not overdo the extras.
-
----
 
 # 📦 Quickleap Assignment – Microservices Architecture
 
